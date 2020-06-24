@@ -1,6 +1,9 @@
 package com.example.firestore_quick_search;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +39,11 @@ public class SearchFirestore {
             }
         }
 
+        //Sorting List...
+        Collections.sort(fieldValue, (name, t1) -> name.getName().compareTo(t1.getName()));
+
         return fieldValue;
+
 
     }
 

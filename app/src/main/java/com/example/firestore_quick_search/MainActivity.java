@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     QuerySnapshot querySnapshot = task.getResult();
+                    Log.e(TAG, "All Document Size: "+querySnapshot.size() );
                     for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                         String nameString = document.getString("name");
                         String sname = document.getString("sname");
@@ -82,28 +83,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void CreateName() {
-        for (int i = 0; i < 500; i++) {
-            int count = i;
-            final String nameId = FirebaseFirestore.getInstance().collection("names").document().getId();
-            Random r = new Random();
-            int low = 5;
-            int high = 10;
-            int result = r.nextInt(high - low) + low;
-            String nameString = getSaltString(result);
-            String sname = getSaltString(result);
-            Name name = new Name(nameString, sname);
-            FirebaseFirestore.getInstance().collection("names").document(nameId).set(name).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        searchAdapter.notifyDataSetChanged();
-                        Log.e(TAG, "All Value Added: " + count);
+        FirebaseFirestore.getInstance().collection("names").orderBy("name", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    QuerySnapshot querySnapshot = task.getResult();
+
+                    int counts = querySnapshot.size();
+                    if (counts <= 500) {
+                        for (int i = 0; i < 500; i++) {
+                            int count = i;
+                            final String nameId = FirebaseFirestore.getInstance().collection("names").document().getId();
+                            Random r = new Random();
+                            int low = 5;
+                            int high = 10;
+                            int result = r.nextInt(high - low) + low;
+                            String nameString = getSaltString(result);
+                            String sname = getSaltString(result);
+                            Name name = new Name(nameString, sname);
+                            FirebaseFirestore.getInstance().collection("names").document(nameId).set(name).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        searchAdapter.notifyDataSetChanged();
+                                        Log.e(TAG, "All Value Added: " + count);
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, "Already have values.", Toast.LENGTH_SHORT).show();
                     }
                 }
-            });
+            }
+        });
 
 
-        }
     }
 
     @Override
@@ -137,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_add) {
             Toast.makeText(this, "add is clicked", Toast.LENGTH_SHORT).show();
             CreateName();
+
         }
 
         if (id == R.id.action_search) {
